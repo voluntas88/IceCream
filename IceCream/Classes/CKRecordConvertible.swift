@@ -66,6 +66,19 @@ extension CKRecordConvertible where Self: Object {
                     // Handle to-one relationship: https://realm.io/docs/swift/latest/#many-to-one
                     // So the owner Object has to conform to CKRecordConvertible protocol
                     r[prop.name] = CKReference(recordID: owner.recordID, action: .none)
+                } else if let listBase = self[prop.name] as? ListBase {
+                    // MARK: self[prop.name] cannot parsed as an List<Object>. So it has to cast as low level object ListBase and read _rlmArray data from it.
+                    var referenceList = [CKReference]()
+                    for index in 0..<listBase._rlmArray.count {
+                        guard let object = listBase._rlmArray[index] as? CKRecordConvertible else {
+                            break
+                        }
+                        let reference = CKReference(recordID: object.recordID, action: .none)
+                        referenceList.append(reference)
+                    }
+                    
+                    r[prop.name] = referenceList as CKRecordValue
+                    
                 } else {
                     /// Just a warm hint:
                     /// When we set nil to the property of a CKRecord, that record's property will be hidden in the CloudKit Dashboard
