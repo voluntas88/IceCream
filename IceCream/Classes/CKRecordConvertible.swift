@@ -77,7 +77,9 @@ extension CKRecordConvertible where Self: Object {
                         referenceList.append(reference)
                     }
                     
-                    r[prop.name] = referenceList as CKRecordValue
+                    if referenceList.count > 0 {
+                        r[prop.name] = referenceList as CKRecordValue
+                    }
                     
                 } else {
                     /// Just a warm hint:
